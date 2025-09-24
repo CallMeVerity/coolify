@@ -48,10 +48,10 @@ services:
            echo "Setting logs permissions..."
            chown -R nginx: /app/storage/logs/
 
-           USER_EXISTS=$(php artisan tinker --no-ansi --execute='echo \Pterodactyl\Models\User::where("email", "'"$ADMIN_EMAIL"'")->exists() ? "1" : "0";')
+           ADMIN_EXISTS=$(php artisan tinker --no-ansi --execute='echo \Pterodactyl\Models\User::where("root_admin", 1)->exists() ? "1" : "0";')
 
-           if [ "$USER_EXISTS" = "0" ]; then
-             echo "Admin User does not exist, creating user now."
+           if [ "$ADMIN_EXISTS" = "0" ]; then
+             echo "No admin user found, creating new admin."
              php artisan p:user:make --no-interaction \
                --admin=1 \
                --email="$ADMIN_EMAIL" \
@@ -61,7 +61,7 @@ services:
                --password="$ADMIN_PASSWORD"
              echo "Admin user created successfully!"
            else
-             echo "Admin User already exists, skipping creation."
+             echo "Admin user already exists, skipping creation."
            fi
 
            exec supervisord --nodaemon
